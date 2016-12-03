@@ -7,6 +7,7 @@
 
 namespace Maalen\Flysystem\Exec;
 use League\Flysystem\Sftp\SftpAdapter;
+use League\Flysystem\AdapterInterface;
 use phpseclib\Net\SFTP;
 
 class SSHAdapter extends SftpAdapter
@@ -37,8 +38,26 @@ class SSHAdapter extends SftpAdapter
                 throw new \RuntimeException('Root is invalid or does not exist: '.$root);
             }
             $this->root = $this->connection->pwd() . $this->separator;
-
         }
+    }
+
+    protected function normalizeListingObject($path, array $object)
+    {
+        $permissions = $this->normalizePermissions($object['permissions']);
+        if ($object['type']===3) {
+            $object = $this->connection->lstat($this->connection->readlink($path));
+        }
+        $type = ($object['type'] === 1) ? 'file' : 'dir';
+        $timestamp = $object['mtime'];
+
+        if ($type === 'dir') {
+            return compact('path', 'timestamp', 'type');
+        }
+
+        $visibility = $permissions & 0044 ? AdapterInterface::VISIBILITY_PUBLIC : AdapterInterface::VISIBILITY_PRIVATE;
+        $size = (int) $object['size'];
+
+        return compact('path', 'timestamp', 'type', 'visibility', 'size');
     }
 
     public function execute($command)
