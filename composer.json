@@ -1,0 +1,24 @@
+{
+    "name": "maalen/flysystem-exec",
+    "description": "Patch to execute commands in local/sftp filesystems",
+    "version": "1.0",
+    "type": "library",
+    "require": {
+        "php": ">=5.4.0",
+        "league/flysystem": "^1.0",
+        "league/flysystem-sftp": "^1.0"
+    },
+    "license": "GPL v3",
+    "authors": [
+        {
+            "name": "Maskaev Andrey",
+            "email": "ex.maalen@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Maalen\\Flysystem\\Exec\\": "src"
+        }
+    }
+
+}

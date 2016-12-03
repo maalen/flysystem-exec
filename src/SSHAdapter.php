@@ -1,0 +1,49 @@
+<?php
+/**
+ * @author Maskaev Andrey <ex.maalen@gmail.com>
+ * @licence GPL v3
+ * @version 1.0
+ */
+
+namespace Maalen\Flysystem\Exec;
+use League\Flysystem\Sftp\SftpAdapter;
+use phpseclib\Net\SFTP;
+
+class SSHAdapter extends SftpAdapter
+{
+
+    /**
+     * Connect.
+     */
+    public function connect()
+    {
+        $this->connection = $this->connection ?: new SFTP($this->host, $this->port, $this->timeout);
+        $this->login();
+        $this->setConnectionRoot();
+    }
+
+    /**
+     * Set the connection root.
+     */
+    protected function setConnectionRoot()
+    {
+        $root = $this->getRoot();
+
+        if (! $root) {
+            $this->root = $this->connection->pwd() . $this->separator;
+            return;
+        } else {
+            if (! $this->connection->chdir($root)) {
+                throw new \RuntimeException('Root is invalid or does not exist: '.$root);
+            }
+            $this->root = $this->connection->pwd() . $this->separator;
+
+        }
+    }
+
+    public function execute($command)
+    {
+        return ['out' => $this->connection->exec($command), 'code'=> $this->connection->exit_status];
+    }
+
+}
