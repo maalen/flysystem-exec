@@ -1,7 +1,7 @@
 {
     "name": "maalen/flysystem-exec",
     "description": "Patch to execute commands in local/sftp filesystems",
-    "version": "1.0",
+    "version": "1.2",
     "type": "library",
     "require": {
         "php": ">=5.4.0",
