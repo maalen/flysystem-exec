@@ -6,6 +6,7 @@
  */
 namespace Maalen\Flysystem\Exec;
 use League\Flysystem\Adapter\Local;
+use League\Flysystem\UnreadableFileException;
 
 /**
  * Class LocalAdapter
@@ -32,6 +33,36 @@ class LocalAdapter extends Local
     protected function normalizeFileInfo(\SplFileInfo $file)
     {
         return $this->mapFileInfo($file);
+    }
+
+    /**
+     * @param \SplFileInfo $file
+     * @throws UnreadableFileException
+     */
+    protected function guardAgainstUnreadableFileInfo(\SplFileInfo $file)
+    {
+        if (!$file->isReadable() && !$file->isLink()) {
+            throw UnreadableFileException::forFileInfo($file);
+        }
+    }
+
+    /**
+     * @param \SplFileInfo $file
+     * @return array
+     */
+    protected function mapFileInfo(\SplFileInfo $file)
+    {
+        $normalized = [
+            'type' => $file->getType(),
+            'path' => $this->getFilePath($file),
+        ];
+        if ($file->getRealPath()) {
+            $normalized['timestamp'] = $file->getMTime();
+            if ($normalized['type'] !== 'dir') {
+                $normalized['size'] = $file->getSize();
+            }
+        }
+        return $normalized;
     }
 
 }
